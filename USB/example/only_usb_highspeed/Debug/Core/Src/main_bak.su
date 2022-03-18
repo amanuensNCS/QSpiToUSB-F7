@@ -1,0 +1,4 @@
+main_bak.c:64:5:main	250024	static
+main_bak.c:115:6:SystemClock_Config	88	static
+main_bak.c:162:13:MX_GPIO_Init	64	static
+main_bak.c:603:6:Error_Handler	4	static,ignoring_inline_asm
