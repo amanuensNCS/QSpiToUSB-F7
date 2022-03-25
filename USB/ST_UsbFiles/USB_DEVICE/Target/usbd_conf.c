@@ -369,9 +369,15 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   HAL_PCD_RegisterIsoOutIncpltCallback(&hpcd_USB_OTG_HS, PCD_ISOOUTIncompleteCallback);
   HAL_PCD_RegisterIsoInIncpltCallback(&hpcd_USB_OTG_HS, PCD_ISOINIncompleteCallback);
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
+
+  // NCS BEGIN
+  // Reduced the RX buffer size and increased the tx buffer size since this device will mostly be sending data.
+  // The buffer size has to add up to 4 kibibytes. Note that the size arguments here specifies the nr of 4 byte words and
+  // not the number of bytes each buffer should have.
   HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_HS, 0x40); // original 0x200
   HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 0, 0x40); // original 0x80
   HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 1, 0x380); // original x174
+  // NCS END
   }
   return USBD_OK;
 }

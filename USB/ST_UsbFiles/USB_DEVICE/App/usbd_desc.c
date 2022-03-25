@@ -64,11 +64,13 @@
 
 #define USBD_VID     1155
 #define USBD_LANGID_STRING     1033
+// NCS BEGIN
 #define USBD_MANUFACTURER_STRING     "NCS Lab"
 #define USBD_PID_HS     22336
 #define USBD_PRODUCT_STRING_HS     "NCS Quad Spi Receiver"
 #define USBD_CONFIGURATION_STRING_HS     "QSpi Config"
 #define USBD_INTERFACE_STRING_HS     "Qspi Interface"
+// NCS END
 
 #define USB_SIZ_BOS_DESC            0x0C
 
@@ -153,6 +155,7 @@ USBD_DescriptorsTypeDef HS_Desc =
   #pragma data_alignment=4
 #endif /* defined ( __ICCARM__ ) */
 /** USB standard device descriptor. */
+// NCS BEGIN: This has been changed to be a "Vendor Specific Device" instead of a CDC one.
 __ALIGN_BEGIN uint8_t USBD_HS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
 {
   0x12,                       /*bLength */
@@ -181,6 +184,7 @@ __ALIGN_BEGIN uint8_t USBD_HS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   USBD_IDX_SERIAL_STR,        /*Index of serial number string*/
   USBD_MAX_NUM_CONFIGURATION  /*bNumConfigurations*/
 };
+// NCS END
 
 /** BOS descriptor. */
 #if (USBD_LPM_ENABLED == 1)

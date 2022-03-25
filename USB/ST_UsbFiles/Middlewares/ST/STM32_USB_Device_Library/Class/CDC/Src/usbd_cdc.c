@@ -155,6 +155,10 @@ USBD_ClassTypeDef  USBD_CDC =
   USBD_CDC_GetDeviceQualifierDescriptor,
 };
 
+// NCS BEGIN
+// The folowing descriptors have been more or less modified to no longer be a CDC Descriptor but rather a
+// generic usb device with a single IN endpoint.
+
 /* USB CDC device Configuration Descriptor */
 __ALIGN_BEGIN static uint8_t USBD_CDC_CfgHSDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END =
 {
@@ -266,6 +270,8 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_OtherSpeedCfgDesc[USB_CDC_CONFIG_DESC_SIZ]
   0x00,
   0x00                                        /* bInterval */
 };
+
+// NCS END
 
 /**
   * @}
@@ -501,9 +507,12 @@ static uint8_t USBD_CDC_Setup(USBD_HandleTypeDef *pdev,
   */
 static uint8_t USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
-	/*uint8_t buff[10] = {0};
-  USBD_LL_Transmit(pdev, epnum, buff, sizeof(buff));
-  return (uint8_t)USBD_OK; */
+  // NCS BEGIN
+  // One could think that this callback is called every time when the PC host sends an IN request but this is only
+  // the case if we have added some data to send in the TX buffer. Otherwise the hardware or the usb library,
+  // I'm uncertain of which, will automatically respond with a NACK bit when PC sends an IN request and this
+  // callback will not be called.
+  // NCS END
   USBD_CDC_HandleTypeDef *hcdc;
   PCD_HandleTypeDef *hpcd = pdev->pData;
 
