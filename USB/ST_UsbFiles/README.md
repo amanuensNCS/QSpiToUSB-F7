@@ -1,8 +1,27 @@
 # What this library is
-This "library" is more of an example use case of ST's USB device library which can be read about in [UM1734](https://www.st.com/resource/en/user_manual/dm00108129-stm32cube-usb-device-library-stmicroelectronics.pdf). When using ST's library it easy to get started in CubeMX by first enabling one of the usb port as usb device and then selecting one of the device classes under middleware. The complication here is that none of the standardized usb classes quite provide the functionality to continously send large amount of data and providing an easy way to interface on the pc side. 
+This "library" is more of an example use case of ST's USB device library which can be read about in [UM1734](https://www.st.com/resource/en/user_manual/dm00108129-stm32cube-usb-device-library-stmicroelectronics.pdf). When using ST's library it easy to get started in CubeMX by first enabling one of the usb port as usb device and then selecting one of the device classes under middleware. The complication here is that none of the standardized usb classes quite provide the functionality to continously send large amount of data and easily reading this data from code on the pc side.
 
-What we have done to solve this is to modify the existing Communication Device Class (CDC) to be optimized to primerley sending data to the pc and to register iteself as a "Vendor Specific" device class when communicating with the pc.
+What we have done to solve this is to modify the existing Communication Device Class (CDC) to be optimized to primerley send data to the pc and changed how it presents itself to the PC to prevent loading any default drivers for it. That way we can easily access get data from PC written code since no other driver is occupying the device. When a device presents itself this way as a non standard device it is called a "Vendor Specfic" device. 
 
+All USB communication goes "endpoints" which usually either are IN or OUT endpoints. In our case we have an "IN" endpoint on address (just a unique identifying number) 0x81 so PC would make an IN request on address 0x81 to get data from the device. How the device sends data to the PC is described below:
+
+## How to use
+Enable the high speed usb port in CubeMX and under middleware select the Communcation Device Class. Generate the code. When generating code for high speed USB, CubeMX seems to forget to start the clock to the "ULPI" phy so a "\_\_HAL_RCC_USB_OTG_HS_ULPI_CLK_ENABLE()" is requeired before "MX_USB_DEVICE_Init()" for it to work properly.
+
+Cube MX should now have generated two folders, "USB_DEVICE" and "Middlewares/ST/STM32_USB_Device_Library". Replace these with the ones given in this repositroy. Description of subfolders:
+
+1. Middlewares/.../Class/CDC/ Contains files for our modified CDC class and all it's callbacks as all of the usb descriptors except the device descriptor (The usb descriptors are what are sent to the PC and tells the PC how to interact with the device).  
+2. Middlewares/.../Core/ Contains "core" usb library files and are files we have not modified but are ST's original. 
+3. USB_DEVICE/App/ Contains 
+  1. Interface functions, API, to the "CDC" class mentioned above in the "*_if.[ch]" files. 
+  2. "usbd_desc.[ch]" contains the USB device descriptor 
+  3. "usb_device.[ch]" are trivial CubeMX files.
+4. USB_DEVICE/Target Contains the layer between the USB library and the F7 hardware specifics which in this case are accessed via HAL. Of special intereset here is the "USBD_LL_Init" function since there you can distribute the total buffer size between the different endpoints. 
+  
+In code you can now import "usbd_cdc_if.h" and call the "CDC_Trasmit_HS(buffer, length)" which make sure that the data is sent on the next IN requst to address 0x81 from the pc. The library will make sure to alwyas fill the peripheral's USB FIFO buffer when it is halfway empty to prevent the peripheral from having to wait for data. The fifo buffer is 4 kibibyte of which 87% is dedictated to the 0x81 IN endpoint in current configuration. The buffer sizes for each endpoint can be set as described above. 
+
+## Points of intereset
+TODO
 
 ## Sending data from PC to the F7
 
